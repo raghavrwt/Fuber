@@ -1,75 +1,18 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+let cabs = require('./data.json');
+
 const cors = require('cors');
 
 var app = express();
 
 app.use(cors());
-
-let cabs = [
-    {
-        id: 1,
-        isBooking: false,
-        location: {
-            latitude: 0,
-            longitude: 0,
-        },
-        color: "white"
-    }, 
-    {
-        id: 2,
-        isBooking: false,
-        location: {
-            latitude: 10,
-            longitude: 10,
-        },
-        color: "pink",
-    }, 
-    {
-        id: 3,
-        isBooking: false,
-        location: {
-            latitude: 20,
-            longitude: 20,
-        },
-        color: "pink",
-    }, 
-    {
-        id: 4,
-        isBooking: false,
-        location: {
-            latitude: 30,
-            longitude: 30,
-        },
-        color: "white",
-    },
-    {
-        id: 5,
-        isBooking: false,
-        location: {
-            latitude: 40,
-            longitude: 40,
-        },
-        color: "white",
-    },
-    {
-        id: 6,
-        isBooking: false,
-        location: {
-            latitude: 50,
-            longitude: 50,
-        },
-        color: "pink",
-    },
-];
-
 app.use(bodyParser.json());
-
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-app.get('/showAllCabs', (req, res) => {
+app.get('/', (req, res) => {
     res.json({ cabs });
 })
 
@@ -83,6 +26,7 @@ const getDistance = (customerLocation, cabLocation) => {
 const getNearestCab = (position, color) => {
     let closestCab = null;
     let minDistance = Infinity;
+    console.log("cABS", cabs);
     cabs.forEach(cab => {
         if(!cab.isBooking) {
             if(color) {
@@ -132,7 +76,7 @@ app.get('/bookCab', (req, res) => {
         }
     }
     else {
-        res.json({msg: 'No valid parameters found.'})
+        res.json({msg: 'No parameters found.'})
     }
 })
 
@@ -149,34 +93,38 @@ const getPrice = (locationFrom, locationTo, color) => {
 }
 
 app.post('/completeRide', (req, res) => {
-    console.log(req.body);
     const cabId = req.body.id;
     const locationFrom = req.body.locationFrom;
     const locationTo = req.body.locationTo;
-    let bookedCab = null;
-    cabs.forEach(cab => {
-        if(cab.id === cabId) {
-            bookedCab = cab;
-        }
-    })
-    if(bookedCab) {
-        console.log("Booking", bookedCab)
-        if(bookedCab.isBooking) {
-            bookedCab.isBooking = false;
-            const color = bookedCab.color;
-            const price = getPrice(locationFrom, locationTo, color);
-            res.json({
-                msg: "Ride Completed Successfully",
-                totalPrice: price,
-            })
+    if(cabId && locationFrom && locationTo) {
+        let bookedCab = null;
+        cabs.forEach(cab => {
+            if(cab.id === cabId) {
+                bookedCab = cab;
+            }
+        })
+        if(bookedCab) {
+            if(bookedCab.isBooking) {
+                bookedCab.isBooking = false;
+                const color = bookedCab.color;
+                const price = getPrice(locationFrom, locationTo, color);
+                res.json({
+                    msg: "Ride Completed Successfully",
+                    totalPrice: price,
+                })
+            }
+            else {
+                res.json({msg: "You need to book a cab first"});
+            }
         }
         else {
-            res.json({msg: "You need to book a cab first"});
+            res.json({ msg: "No cabs Found" });
         }
     }
     else {
-        res.json({ msg: "No cabs Found" });
+        res.json({msg: "Requests cannot proceed"});
     }
+    
 })
 
 app.listen(4000, () => console.log('Listening on port 4000'));

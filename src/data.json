@@ -1,0 +1,56 @@
+[
+    {
+        "id": 1,
+        "isBooking": false,
+        "location": {
+            "latitude": 0,
+            "longitude": 0
+        },
+        "color": "white"
+    }, 
+    {
+        "id": 2,
+        "isBooking": false,
+        "location": {
+            "latitude": 10,
+            "longitude": 10
+        },
+        "color": "pink"
+    }, 
+    {
+        "id": 3,
+        "isBooking": false,
+        "location": {
+            "latitude": 20,
+            "longitude": 20
+        },
+        "color": "pink"
+    }, 
+    {
+        "id": 4,
+        "isBooking": false,
+        "location": {
+            "latitude": 30,
+            "longitude": 30
+        },
+        "color": "white"
+    },
+    {
+        "id": 5,
+        "isBooking": false,
+        "location": {
+            "latitude": 40,
+            "longitude": 40
+        },
+        "color": "white"
+    },
+    {
+        "id": 6,
+        "isBooking": false,
+        "location": {
+            "latitude": 50,
+            "longitude": 50
+        },
+        "color": "pink"
+    }
+]

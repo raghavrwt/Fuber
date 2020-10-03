@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import CabList from './CabList';
 import axios from 'axios';
 
 class App extends Component {
@@ -12,39 +13,35 @@ class App extends Component {
   componentDidMount() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
-        // const latitude = position.coords.latitude;
-        // const longitude = position.coords.longitude;
-        // const color = 'pink'
-        // const url = `http://localhost:4000/bookCab?latitude=${latitude}&longitude=${longitude}&color=${color}`;
-        const url = `http://localhost:4000/completeRide`;
-        // axios.get(url).then(response => {
-        //   console.log("Response", response);
-        //   if (response.status !== 200) {
-        //       return {
-        //           isSuccess: false
-        //       }
-        //   }
-        //   this.setState({ cabs: response.data.cabs });
-        //   return response.data;
-        // });
-        axios.post(url, {
-          id: 6,
-          locationFrom: { latitude: 105, longitude: 105},
-          locationTo: { latitude: 25, longitude: 25}
-        }).then(response => {
-          console.log("Response", response);
-        })
+        const url = `http://localhost:4000/`;
+        axios.get(url).then(response => {
+          if (response.status !== 200) {
+              return {
+                  isSuccess: false
+              }
+          }
+          this.setState({ cabs: response.data.cabs });
+          return response.data;
+        });
       });
     }
   }
 
   render() {
-    console.log("Cabs", this.state.cabs);
+    const { cabs } = this.state;
     return (
-      <div>
-        <h4>Using geolocation JavaScript API in React</h4>
+      <div style ={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+        {cabs.map((cab, index) => {
+          return (
+            <CabList 
+              key={index}
+              cab={cab}
+              bookNow={this.bookNow} 
+            />
+          )
+        })}
       </div>
-    );
+    )
   }
 }
 
