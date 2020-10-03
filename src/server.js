@@ -6,7 +6,7 @@ var app = express();
 
 app.use(cors());
 
-const cabs = [
+let cabs = [
     {
         id: 1,
         isBooking: false,
@@ -84,11 +84,24 @@ const getNearestCab = (position, color) => {
     let closestCab = null;
     let minDistance = Infinity;
     cabs.forEach(cab => {
-        const distance = getDistance(position, cab.location);
-        if(distance < minDistance) {
-            minDistance = distance;
-            closestCab = cab; 
-        } 
+        if(!cab.isBooking) {
+            if(color) {
+                if(color === cab.color) {
+                    const distance = getDistance(position, cab.location);
+                    if(distance < minDistance) {
+                        minDistance = distance;
+                        closestCab = cab; 
+                    }                
+                }
+            }
+            else {
+                const distance = getDistance(position, cab.location);
+                if(distance < minDistance) {
+                    minDistance = distance;
+                    closestCab = cab; 
+                }
+            }
+        }
     })
     return closestCab;
 }
@@ -103,18 +116,66 @@ app.get('/bookCab', (req, res) => {
         latitude,
         longitude,
     };
-    const bookedCab = getNearestCab(customerLocation, color)
-    if(bookedCab) {
-        bookedCab.isBooking = true;
-        res.json({
-            bookedCab : {
-                msg: "Cab is Booked!",
-                ...bookedCab,
-            }
-        })
+    if(latitude && longitude) {
+        const bookedCab = getNearestCab(customerLocation, color)
+        if(bookedCab) {
+            bookedCab.isBooking = true;
+            res.json({
+                bookedCab : {
+                    msg: "Cab is Booked!",
+                    ...bookedCab,
+                }
+            })
+        }
+        else {
+            res.json({msg: "No cabs are available"});
+        }
     }
     else {
-        res.json({msg: "No cabs are available"});
+        res.json({msg: 'No valid parameters found.'})
+    }
+})
+
+const getPrice = (locationFrom, locationTo, color) => {
+    let returnPrice = null;
+    const distance = getDistance(locationFrom, locationTo);
+    if(color === 'pink') {
+        returnPrice = (distance * 2) + 5;
+    }
+    else {
+        returnPrice = (distance * 2)
+    }
+    return returnPrice;
+}
+
+app.post('/completeRide', (req, res) => {
+    console.log(req.body);
+    const cabId = req.body.id;
+    const locationFrom = req.body.locationFrom;
+    const locationTo = req.body.locationTo;
+    let bookedCab = null;
+    cabs.forEach(cab => {
+        if(cab.id === cabId) {
+            bookedCab = cab;
+        }
+    })
+    if(bookedCab) {
+        console.log("Booking", bookedCab)
+        if(bookedCab.isBooking) {
+            bookedCab.isBooking = false;
+            const color = bookedCab.color;
+            const price = getPrice(locationFrom, locationTo, color);
+            res.json({
+                msg: "Ride Completed Successfully",
+                totalPrice: price,
+            })
+        }
+        else {
+            res.json({msg: "You need to book a cab first"});
+        }
+    }
+    else {
+        res.json({ msg: "No cabs Found" });
     }
 })
 
